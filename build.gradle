@@ -1,0 +1,43 @@
+plugins {
+    id 'java'
+}
+
+group = 'io.nikov'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // https://mvnrepository.com/artifact/org.jgrapht/jgrapht-core
+    implementation group: 'org.jgrapht', name: 'jgrapht-core', version: '1.5.2'
+
+    // https://mvnrepository.com/artifact/org.jgrapht/jgrapht-ext
+    implementation group: 'org.jgrapht', name: 'jgrapht-ext', version: '1.5.2'
+
+    // https://mvnrepository.com/artifact/org.jgrapht/jgrapht-io
+    implementation group: 'org.jgrapht', name: 'jgrapht-io', version: '1.5.2'
+
+    // https://mvnrepository.com/artifact/org.jgrapht/jgrapht
+    implementation group: 'org.jgrapht', name: 'jgrapht', version: '1.5.2', ext: 'pom'
+
+    // https://mvnrepository.com/artifact/org.jgrapht/jgrapht-opt
+    implementation group: 'org.jgrapht', name: 'jgrapht-opt', version: '1.5.2'
+
+    // https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.24.3'
+
+    // https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.24.3'
+
+    // https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-layout-template-json
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-layout-template-json', version: '2.24.3'
+
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}

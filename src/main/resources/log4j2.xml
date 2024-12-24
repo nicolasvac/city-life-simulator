@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <!-- Console appender -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSSSSS} %-5p [%t] %c{1}:%L - %msg%n"/>
+        </Console>
+
+        <!-- File appender -->
+        <File name="File" fileName="logs/app.log">
+            <JsonTemplateLayout/>
+        </File>
+    </Appenders>
+
+    <Loggers>
+        <!-- Logger di livello root -->
+        <Logger name="io.nikov" level="INFO"/>
+        <Root level="WARN">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="File"/>
+        </Root>
+    </Loggers>
+</Configuration>
