@@ -16,15 +16,16 @@ public class Simulator {
     private final ScheduledExecutorService tasksExecutor;
     private final SimulationWorld world;
     private final Runnable postUpdateHook;
+    public final double tickRate; // iterations per second
+    public final long tickRateInterval; // effective time per tick
 
-    public static final double TICK_RATE = 0.5; // iterations per second
-    public static final long TICK_INTERVAL_MS = (long) (1000 / TICK_RATE); // effective time per tick
-
-    public Simulator(SimulationWorld world, Runnable postUpdateHook) {
+    public Simulator(SimulationWorld world, double tickRate, Runnable postUpdateHook) {
         this.tickCounter = new AtomicInteger(0);
         this.ticksExecutor = Executors.newScheduledThreadPool(1);
         this.tasksExecutor = Executors.newScheduledThreadPool(4);
         this.world = world;
+        this.tickRate = tickRate;
+        this.tickRateInterval = (long) (1000 / this.tickRate);
         this.postUpdateHook = postUpdateHook;
     }
 
@@ -36,7 +37,7 @@ public class Simulator {
         ticksExecutor.scheduleAtFixedRate(
                 this::simulationStep,
                 1000,
-                TICK_INTERVAL_MS,
+                tickRateInterval,
                 TimeUnit.MILLISECONDS
         );
 

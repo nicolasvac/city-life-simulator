@@ -26,7 +26,7 @@ public class Main {
     public Main() {
         // Initialize Simulation World and Simulator
         SimulationWorld world = new SimulationWorld();
-        this.simulator = new Simulator(world, () -> broadcastSimulationState(world));
+        this.simulator = new Simulator(world, 5, () -> broadcastSimulationState(world));
     }
 
     public void run() {
