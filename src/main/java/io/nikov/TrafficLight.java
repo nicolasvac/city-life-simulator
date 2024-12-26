@@ -19,7 +19,7 @@ public class TrafficLight extends SimulationNode implements Callable<TrafficLigh
     public TrafficLight(String key) {
         super(key);
 
-        this.status = new AtomicReference<>(EnumUtils.getRandomEnum(TrafficLightStatus.class)); // Random start
+        this.status = new AtomicReference<>(Utilities.getRandomEnum(TrafficLightStatus.class)); // Random start
         this.lastChange = new AtomicLong(System.currentTimeMillis());
     }
 
@@ -45,8 +45,18 @@ public class TrafficLight extends SimulationNode implements Callable<TrafficLigh
         LOGGER.info("Status of traffic light {} changed to {}", key, status.get());
     }
 
-    public TrafficLightStatus getStatus() {
-        return status.get();
+    @Override
+    public int getAStarHeuristicCost() {
+        return switch (status.get()) {
+            case RED -> 3;
+            case YELLOW -> 5; // RED (3) + YELLOW (2)
+            case GREEN -> 1;
+        };
+    }
+
+    @Override
+    public boolean canVehicleTraverse() {
+        return status.get() == TrafficLightStatus.GREEN;
     }
 
     @Override

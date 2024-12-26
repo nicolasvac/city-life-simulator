@@ -9,6 +9,20 @@ public abstract class SimulationNode {
         this.key = key;
     }
 
+    /**
+     * Indicates the cost of traversing this node.
+     */
+    public int getAStarHeuristicCost() {
+        return 0;
+    }
+
+    /**
+     * Indicates when a vehicle is authorized to leave this node.
+     */
+    public boolean canVehicleTraverse() {
+        return false;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof SimulationNode that)) return false;
@@ -18,5 +32,12 @@ public abstract class SimulationNode {
     @Override
     public int hashCode() {
         return Objects.hashCode(key);
+    }
+
+    @Override
+    public String toString() {
+        return "SimulationNode{" +
+                "key='" + key + '\'' +
+                '}';
     }
 }

@@ -14,7 +14,7 @@
 
     <Loggers>
         <!-- Logger di livello root -->
-        <Logger name="io.nikov" level="INFO"/>
+        <Logger name="io.nikov" level="DEBUG"/>
         <Root level="WARN">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="File"/>

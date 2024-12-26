@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulation Visualization</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        .node {
+            fill: blue;
+            stroke: black;
+            stroke-width: 1.5px;
+        }
+
+        .link {
+            stroke: gray;
+            stroke-width: 2px;
+        }
+
+        .vehicle {
+            fill: red;
+        }
+
+        text {
+            font-size: 12px;
+            font-family: Arial;
+        }
+    </style>
+</head>
+<body>
+<h2>Simulation Graph Visualization</h2>
+<svg width="800" height="600"></svg>
+
+<script>
+    const svg = d3.select("svg");
+    const width = +svg.attr("width");
+    const height = +svg.attr("height");
+
+    let nodes = [];
+    let links = [];
+    let vehicles = [];
+
+    const simulation = d3.forceSimulation()
+        .force("link", d3.forceLink()
+            .id(d => d.id)
+            .distance(d => d.size) // Make edge length based on size (weight)
+        )
+        .force("charge", d3.forceManyBody().strength(-300)) // Repulsion force
+        .force("center", d3.forceCenter(width / 2, height / 2)); // Centering the graph
+
+    // WebSocket wrapper with auto-reconnect functionality
+    class ReconnectingWebSocket {
+        constructor(url) {
+            this.url = url;
+            this.connect();
+            this.reconnectDelay = 1000; // 1-second initial reconnect delay
+        }
+
+        connect() {
+            this.ws = new WebSocket(this.url);
+
+            this.ws.onopen = () => {
+                console.log("WebSocket connected");
+                this.reconnectDelay = 1000; // Reset the delay on successful connection
+            };
+
+            this.ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                nodes = data.nodes;
+                links = data.edges;
+                vehicles = data.vehicles;
+                updateGraph();
+            };
+
+            this.ws.onclose = () => {
+                console.log("WebSocket closed. Attempting to reconnect...");
+                this.reconnect();
+            };
+
+            this.ws.onerror = (err) => {
+                console.error("WebSocket error:", err);
+                this.ws.close(); // Trigger reconnection
+            };
+        }
+
+        reconnect() {
+            setTimeout(() => {
+                console.log("Reconnecting...");
+                this.connect();
+                this.reconnectDelay = Math.min(this.reconnectDelay * 2, 30000); // Exponential backoff
+            }, this.reconnectDelay);
+        }
+    }
+
+    // Create an auto-reconnecting WebSocket
+    const ws = new ReconnectingWebSocket("ws://localhost:8080/simulation");
+
+    function updateGraph() {
+        svg.selectAll("*").remove(); // Clear previous elements
+
+        // Add links (edges)
+        const link = svg.append("g")
+            .selectAll("line")
+            .data(links)
+            .enter()
+            .append("line")
+            .attr("class", "link");
+
+        // Add nodes
+        const node = svg.append("g")
+            .selectAll("circle")
+            .data(nodes)
+            .enter()
+            .append("circle")
+            .attr("class", "node")
+            .attr("r", 10)
+            .call(drag(simulation));
+
+        // Add node labels
+        svg.append("g")
+            .selectAll("text")
+            .data(nodes)
+            .enter()
+            .append("text")
+            .text(d => d.id)
+            .attr("x", 12)
+            .attr("y", 4);
+
+        // Add vehicles
+        const vehicle = svg.append("g")
+            .selectAll(".vehicle")
+            .data(vehicles)
+            .enter()
+            .append("circle")
+            .attr("class", "vehicle")
+            .attr("r", 5);
+
+        // Update simulation
+        simulation.nodes(nodes).on("tick", () => {
+            link.attr("x1", d => d.source.x)
+                .attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x)
+                .attr("y2", d => d.target.y);
+
+            node.attr("cx", d => d.x).attr("cy", d => d.y);
+
+            vehicle.attr("cx", d => {
+                const edge = links.find(link => link.source.id === d.startNode && link.target.id === d.endNode);
+                if (!edge) return 0;
+                return d.progress / edge.size * (edge.target.x - edge.source.x) + edge.source.x;
+            }).attr("cy", d => {
+                const edge = links.find(link => link.source.id === d.startNode && link.target.id === d.endNode);
+                if (!edge) return 0;
+                return d.progress / edge.size * (edge.target.y - edge.source.y) + edge.source.y;
+            });
+        });
+
+        simulation.force("link").links(links);
+    }
+
+    function drag(simulation) {
+        return d3.drag()
+            .on("start", (event) => {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                event.subject.fx = event.subject.x;
+                event.subject.fy = event.subject.y;
+            })
+            .on("drag", (event) => {
+                event.subject.fx = event.x;
+                event.subject.fy = event.y;
+            })
+            .on("end", (event) => {
+                if (!event.active) simulation.alphaTarget(0);
+                event.subject.fx = null;
+                event.subject.fy = null;
+            });
+    }
+</script>
+</body>
+</html>
